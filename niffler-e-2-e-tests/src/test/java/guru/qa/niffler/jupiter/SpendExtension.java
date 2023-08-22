@@ -1,6 +1,8 @@
 package guru.qa.niffler.jupiter;
 
+import guru.qa.niffler.api.CategoryService;
 import guru.qa.niffler.api.SpendService;
+import guru.qa.niffler.model.CategoryJson;
 import guru.qa.niffler.model.SpendJson;
 import okhttp3.OkHttpClient;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -22,6 +24,7 @@ public class SpendExtension implements BeforeEachCallback {
             .build();
 
     private SpendService spendService = retrofit.create(SpendService.class);
+    private CategoryService categoryService = retrofit.create(CategoryService.class);
 
     @Override
     public void beforeEach(ExtensionContext context) throws Exception {
@@ -37,5 +40,15 @@ public class SpendExtension implements BeforeEachCallback {
             SpendJson createdSpend = spendService.addSpend(spend).execute().body();
             context.getStore(NAMESPACE).put("spend", createdSpend);
         }
+
+        Category cat = context.getRequiredTestMethod().getAnnotation(Category.class);
+        if (cat != null) {
+            CategoryJson category = new CategoryJson();
+            category.setUsername(cat.username());
+            category.setCategory(cat.category());
+            CategoryJson createdCategory = categoryService.addCategory(category).execute().body();
+            context.getStore(NAMESPACE).put("categoryForSpendingWebTest", createdCategory);
+        }
+
     }
 }
