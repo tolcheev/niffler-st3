@@ -24,22 +24,25 @@ public class SpendingWebTest {
         Configuration.browserSize = "1980x1024";
     }
 
+    private static final String user = "vlad";
+    private static final String password = "123qwe";
+
     @BeforeEach
     @Step("User auth before test")
     void doLogin() {
         Selenide.open("http://127.0.0.1:3000/main");
         $("a[href*='redirect']").click();
-        $("input[name='username']").setValue("vlad");
-        $("input[name='password']").setValue("123qwe");
+        $("input[name='username']").setValue(user);
+        $("input[name='password']").setValue(password);
         $("button[type='submit']").click();
     }
 
     @Category(
-            username = "vlad",
+            username = user,
             category = "продукты"
     )
     @Spend(
-            username = "vlad",
+            username = user,
             description = "Кефир",
             category = "продукты",
             amount = 99.99,
@@ -48,6 +51,7 @@ public class SpendingWebTest {
     @Test
     @AllureId("0001")
     void spendingShouldBeDeletedAfterDeleteAction(SpendJson createdSpend) {
+
         step("Create spend", () -> {
             $(".spendings__content tbody")
                     .$$("tr")
