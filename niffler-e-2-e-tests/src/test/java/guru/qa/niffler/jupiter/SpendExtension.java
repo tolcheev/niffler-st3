@@ -1,5 +1,6 @@
 package guru.qa.niffler.jupiter;
 
+import guru.qa.niffler.api.CategoryService;
 import guru.qa.niffler.api.SpendService;
 import guru.qa.niffler.model.SpendJson;
 import okhttp3.OkHttpClient;
