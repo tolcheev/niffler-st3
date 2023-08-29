@@ -4,8 +4,10 @@ import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import guru.qa.niffler.jupiter.Category;
 import guru.qa.niffler.jupiter.Spend;
+import guru.qa.niffler.jupiter.User;
 import guru.qa.niffler.model.CurrencyValues;
 import guru.qa.niffler.model.SpendJson;
+import guru.qa.niffler.model.UserJson;
 import io.qameta.allure.AllureId;
 import io.qameta.allure.Step;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +19,7 @@ import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.$;
 import static io.qameta.allure.Allure.step;
 
-public class SpendingWebTest {
+public class SpendingWebTest extends BaseWebTest {
 
     static {
         Configuration.browser = "chrome";
@@ -26,11 +28,11 @@ public class SpendingWebTest {
 
     @BeforeEach
     @Step("User auth before test")
-    void doLogin() {
+    void doLogin(@User(userType = User.UserType.WITH_FRIENDS) UserJson userForTest) {
         Selenide.open("http://127.0.0.1:3000/main");
         $("a[href*='redirect']").click();
-        $("input[name='username']").setValue("vlad");
-        $("input[name='password']").setValue("123qwe");
+        $("input[name='username']").setValue(userForTest.getUsername());
+        $("input[name='password']").setValue(userForTest.getPassword());
         $("button[type='submit']").click();
     }
 
@@ -46,16 +48,14 @@ public class SpendingWebTest {
             currency = CurrencyValues.RUB
     )
     @Test
-    @AllureId("0001")
-    void spendingShouldBeDeletedAfterDeleteAction(SpendJson createdSpend) {
-        step("Create spend", () -> {
-            $(".spendings__content tbody")
-                    .$$("tr")
-                    .find(text(createdSpend.getDescription()))
-                    .$("td")
-                    .scrollTo()
-                    .click();
-        });
+    @AllureId("100")
+    void spendingShouldBeDeletedAfterDeleteAction(SpendJson createdSpend, @User(userType = User.UserType.WITH_FRIENDS) UserJson userForTest) {
+        step("Create spend", () -> $(".spendings__content tbody")
+                .$$("tr")
+                .find(text(createdSpend.getDescription()))
+                .$("td")
+                .scrollTo()
+                .click());
         step("Delete selected & check is deleted", () -> {
             $(byText("Delete selected")).click();
             $(".spendings__content tbody")
