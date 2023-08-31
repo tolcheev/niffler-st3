@@ -55,15 +55,13 @@ public class UserQueueExtension implements BeforeEachCallback, AfterEachCallback
             if (parameter.getType().isAssignableFrom(UserJson.class)) {
                 User parameterAnnotation = parameter.getAnnotation(User.class);
                 final User.UserType userType = parameterAnnotation.userType();
-                Queue<UserJson> usersQueueByType = usersQueue.get(parameterAnnotation.userType());
-                UserJson candidateForTest = null;
+                Queue<UserJson> usersQueueByType = usersQueue.computeIfAbsent(userType, k -> new LinkedList<>());
+                UserJson candidateForTest = usersQueueByType.poll();
 
-                while (candidateForTest == null) {
-                    candidateForTest = usersQueueByType.poll();
+                if (candidateForTest != null) {
+                    candidateForTest.setUserType(userType);
+                    context.getStore(NAMESPACE).put(getAllureId(context), candidateForTest);
                 }
-
-                candidateForTest.setUserType(userType);
-                context.getStore(NAMESPACE).put(getAllureId(context), candidateForTest);
 
                 break;
             }
@@ -73,6 +71,7 @@ public class UserQueueExtension implements BeforeEachCallback, AfterEachCallback
 
     @Override
     public void afterEach(ExtensionContext context) {
+
         UserJson userFromTest = context.getStore(NAMESPACE).get(getAllureId(context), UserJson.class);
         usersQueue.get(userFromTest.getUserType()).add(userFromTest);
     }
@@ -85,7 +84,11 @@ public class UserQueueExtension implements BeforeEachCallback, AfterEachCallback
 
     @Override
     public UserJson resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        return extensionContext.getStore(NAMESPACE).get(getAllureId(extensionContext), UserJson.class);
+        Parameter parameter = parameterContext.getParameter();
+        User parameterAnnotation = parameter.getAnnotation(User.class);
+        User.UserType userType = parameterAnnotation.userType();
+        Queue<UserJson> usersQueueByType = usersQueue.computeIfAbsent(userType, k -> new LinkedList<>());
+        return usersQueueByType.peek();
     }
 
     private String getAllureId(ExtensionContext context) {

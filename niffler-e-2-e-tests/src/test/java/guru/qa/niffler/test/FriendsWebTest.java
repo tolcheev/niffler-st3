@@ -25,10 +25,14 @@ public class FriendsWebTest extends BaseWebTest {
         $("button[type='submit']").click();
     }
 
+    // w/o @User(userType = User.UserType.WITH_FRIENDS) UserJson userForTest
+
     @Test
     @AllureId("101")
     void friendShouldBeDisplayedInTable() {
-        step("Click on 'Friends' button", () -> $("a[href='/friends']").click());
+        step("Click on 'Friends' button", () -> {
+            $("a[href='/friends']").click();
+        });
 
         step("Check text 'You are friends' is visible", () -> {
             $(byText("You are friends")).shouldBe(visible);
@@ -37,8 +41,10 @@ public class FriendsWebTest extends BaseWebTest {
 
     @Test
     @AllureId("102")
-    void friendShouldBeDisplayedInTable2(@User(userType = User.UserType.WITH_FRIENDS) UserJson userForTest) {
-        step("Click on 'Friends' button", () -> $("a[href='/friends']").click());
+    void friendShouldBeDisplayedInTable2() {
+        step("Click on 'Friends' button", () -> {
+            $("a[href='/friends']").click();
+        });
 
         step("Check text 'You are friends' is visible", () -> {
             $(byText("You are friends")).shouldBe(visible);
